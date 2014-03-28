@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Scripts folder path (relative to the project folder)
-BIN_DIR="mysql-tools"
+BIN_DIR="vendor/impactwave/mysql-tools"
 
 # Project folder path on remote server (relative to the SSH user's home folder)
 REMOTE_CWD="app"
