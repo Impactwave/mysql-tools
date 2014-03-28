@@ -4,9 +4,9 @@ BASE=$(dirname $0)
 source $BASE/inc/util.sh
 source $BASE/config/config.sh
 
-echo "--------------------------------------
-Update MySQL databases between servers
---------------------------------------
+echo "----------------------------------------
+Transfer MySQL databases between servers
+----------------------------------------
 "
 
 if [ $# -ne 3 ]
