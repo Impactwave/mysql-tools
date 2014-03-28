@@ -1,6 +1,14 @@
 #!/bin/bash
 
-BASE=$(dirname $0)
+OBASE=$(pwd)
+cd $(dirname $0)
+LNK=$(readlink $(basename $0)) # Check if path is a symlink
+if [ -n "$LNK" ]; then
+  cd $(dirname $LNK)
+fi
+BASE=$(pwd -P)
+cd $OBASE
+
 source $BASE/inc/util.sh
 source $BASE/config/config.sh
 
@@ -22,7 +30,7 @@ shift $((OPTIND-1))
 
 if [ $# -ne 2 ]
 then
-  echo "Usage: $0 [options] databases archive_name
+  echo "Usage: $(basename $0) [options] databases archive_name
 
 Parameters:
   databases     $MAINDB

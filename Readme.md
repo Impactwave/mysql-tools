@@ -2,23 +2,36 @@
 
 ##### Command-line shell scripts for managing MySQL databases on Laravel-based web applications.
 
-### Installation
+## Installation
 
-Clone the repo into your application's `app` directory.
+#### Installing via Composer
+
+Add the following to our `composer.json` file:
+
+```
+"require": {
+    "impactwave/mysql-tools": "dev-master"
+},
+```
 
 ### Configuration steps
 
+If you haven't done it before, add `vendor/bin` to your path, so that you may execute package executables from your project's root folder.
+
+
+#####Example:
+
 Add this to your shell environment (ex: at `~/.profile` or `~/.bash_profile`):
 
-	export PATH=$PATH:./mysql-tools
+	export PATH=$PATH:./vendor/bin
 
-### Usage
+## Usage
 
-On the terminal, change to your project's `app` directory and just type the desired command name.
+On the terminal, change to your project's root directory (where your `composer.json` lies) and just type the desired command name.
 
-You can use autocompletion pressing Tab.
+You can use autocompletion by pressing Tab.
 
-### License
+## License
 
 MIT
 
