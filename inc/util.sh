@@ -2,6 +2,25 @@
 
 CONFIG_PATH="src/config"
 
+#---------------------------------
+# Get the current environment name
+#---------------------------------
+
+ENV="local"
+[ $ENV_NAME ] && ENV=$ENV_NAME
+OENV=$ENV
+
+while getopts "h:e:t:" opt; do
+  case $opt in
+    e)
+      ENV=$OPTARG
+      OENV=$OPTARG
+      ;;
+  esac
+done
+
+#---------------------------------
+
 timer()
 {
   if [[ $# -eq 0 ]]; then
@@ -38,20 +57,4 @@ get_ssh_login()
   fi
   _HOST=`awk -F\' '/'\''MySQL_host'\''/{print $4;exit}' $CONFIG_PATH/$_ENV/settings.php`
   _SSH_USER=`awk -F\' '/'\''SSH_user'\''/{print $4;exit}' $CONFIG_PATH/$_ENV/settings.php`
-}
-
-get_env()
-{
-  ENV="local"
-  [ $ENV_NAME ] && ENV=$ENV_NAME
-  OENV=$ENV
-
-  while getopts "h:e:t:" opt; do
-    case $opt in
-      e)
-        ENV=$OPTARG
-        OENV=$OPTARG
-        ;;
-    esac
-  done
 }
