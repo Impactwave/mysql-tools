@@ -8,12 +8,10 @@ CONFIG_PATH="src/config"
 
 ENV="local"
 [ $ENV_NAME ] && ENV=$ENV_NAME
-OENV=$ENV
 while getopts "h:e:t:" opt; do
   case $opt in
     e)
       ENV=$OPTARG
-      OENV=$OPTARG
       ;;
   esac
 done

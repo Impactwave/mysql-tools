@@ -48,10 +48,6 @@ The backup archive should contain a file named '$MAINDB-dump.sql'.
   exit 1
 fi
 
-if [ "$ENV" == "production" ]; then
-  ENV=''
-fi
-
 case $1 in
   $MAINDB)
     MAIN="$MAINDB-dump.sql"
@@ -61,15 +57,15 @@ case $1 in
     exit 1
 esac
 
-case $OENV in
+case $ENV in
   local|intranet|staging|production)
-    echo -e "Environment:\t$OENV";;
+    echo -e "Environment:\t$ENV";;
   *)
-    echo "Invalid environment $OENV."
+    echo "Invalid environment $ENV."
     exit 1
 esac
 
-get_db_login
+get_db_login $ENV
 
 echo -e "MySQL host:\t$HOST
 Backup archive:\t$2
