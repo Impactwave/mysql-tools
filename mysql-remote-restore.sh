@@ -75,6 +75,7 @@ then
   [ $? -ne 0 ] && exit 1
 else
   echo "Transferring backup to $TARGET_SSH_USER@$TARGET_HOST"
+  ssh $TARGET_SSH_USER@$TARGET_HOST "mkdir -p $REMOTE_CWD/$TMP_DIR" # create the target directory if it doesn't exist
   scp $ARCHIVE $TARGET_SSH_USER@$TARGET_HOST:$REMOTE_CWD/$TMP_DIR
   [ $? -ne 0 ] && exit 1
 
