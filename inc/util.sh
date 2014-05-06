@@ -18,7 +18,7 @@ done
 if [ "$ENV" == "production" ]; then
   CFG_ENV=""
 else
-  CFG_ENV="$1"
+  CFG_ENV="$ENV"
 fi
 
 #---------------------------------
