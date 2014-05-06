@@ -3,9 +3,6 @@
 # Scripts folder path (relative to the project folder)
 BIN_DIR="vendor/impactwave/mysql-tools"
 
-# Project folder path on remote server (relative to the SSH user's home folder)
-REMOTE_CWD=`awk -F\' '/'\''remote_cwd'\''/{print $4;exit}' $CONFIG_PATH/$ENV/settings.php`
-
 # Temporary folder path (relative to the project folder)
 TMP_DIR="tmp"
 

@@ -60,50 +60,34 @@ esac
 case $2 in
   local|intranet)
     SOURCE_TYPE="local"
-    SOURCE_ENV=$2
-    SOURCE_ENV_CFG=$2
     ;;
-  staging)
+  staging|production)
     SOURCE_TYPE="remote"
-    SOURCE_ENV=$2
-    SOURCE_ENV_CFG=$2
-    ;;
-  production)
-    SOURCE_TYPE="remote"
-    SOURCE_ENV=$2
-    SOURCE_ENV_CFG=$2
     ;;
   *)
     echo "Invalid environment $2."
     exit 1
 esac
+SOURCE_ENV=$2
 
 case $3 in
   local|intranet)
     TARGET_TYPE="local"
-    TARGET_ENV=$3
-    TARGET_ENV_CFG=$3
     ;;
-  staging)
+  staging|production)
     TARGET_TYPE="remote"
-    TARGET_ENV=$3
-    TARGET_ENV_CFG=$3
-    ;;
-  production)
-    TARGET_TYPE="remote"
-    TARGET_ENV=$3
-    TARGET_ENV_CFG=$3
     ;;
   *)
     echo "Invalid environment $3."
     exit 1
 esac
+TARGET_ENV=$3
 
-get_ssh_login $SOURCE_ENV_CFG
+get_ssh_login $SOURCE_ENV
 SOURCE_HOST=$_HOST
 SOURCE_SSH_USER=$_SSH_USER
 
-get_ssh_login $TARGET_ENV_CFG
+get_ssh_login $TARGET_ENV
 TARGET_HOST=$_HOST
 TARGET_SSH_USER=$_SSH_USER
 
@@ -117,6 +101,8 @@ then
   $BIN_DIR/$BACKUP_SCRIPT $TABLES -e $SOURCE_ENV $DATABASES $TMP_DIR $ARCHIVE
   [ $? -ne 0 ] && exit 1
 else
+  get_remote_cwd $SOURCE_ENV
+
   echo "Connecting to $SOURCE_SSH_USER@$SOURCE_HOST"
   ssh $SOURCE_SSH_USER@$SOURCE_HOST "cd $REMOTE_CWD; $BIN_DIR/$BACKUP_SCRIPT $TABLES -h localhost -e $SOURCE_ENV $DATABASES $TMP_DIR $ARCHIVE"
   [ $? -ne 0 ] && exit 1
@@ -131,6 +117,8 @@ then
   $BIN_DIR/$RESTORE_SCRIPT -e $TARGET_ENV $DATABASES $TMP_DIR/$ARCHIVE
   [ $? -ne 0 ] && exit 1
 else
+  get_remote_cwd $TARGET_ENV
+
   echo "Transferring backup to $TARGET_SSH_USER@$TARGET_HOST"
   scp $TMP_DIR/$ARCHIVE $TARGET_SSH_USER@$TARGET_HOST:$REMOTE_CWD/$TMP_DIR
   [ $? -ne 0 ] && exit 1

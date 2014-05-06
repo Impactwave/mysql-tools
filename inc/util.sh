@@ -58,3 +58,14 @@ get_ssh_login()
   _HOST=`awk -F\' '/'\''MySQL_host'\''/{print $4;exit}' $CONFIG_PATH/$_ENV/settings.php`
   _SSH_USER=`awk -F\' '/'\''SSH_user'\''/{print $4;exit}' $CONFIG_PATH/$_ENV/settings.php`
 }
+
+get_remote_cwd()
+{
+  if [ "$1" == "production" ]; then
+    _ENV=""
+  else
+    _ENV="$1"
+  fi
+  # Project folder path on remote server (relative to the SSH user's home folder)
+  REMOTE_CWD=`awk -F\' '/'\''remote_cwd'\''/{print $4;exit}' $CONFIG_PATH/$_ENV/settings.php`
+}

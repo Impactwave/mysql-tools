@@ -62,23 +62,15 @@ esac
 case $2 in
   local|intranet)
     SOURCE_TYPE="local"
-    SOURCE_ENV=$2
-    SOURCE_ENV_CFG=$2
     ;;
-  staging)
+  staging|production)
     SOURCE_TYPE="remote"
-    SOURCE_ENV=$2
-    SOURCE_ENV_CFG=$2
-    ;;
-  production)
-    SOURCE_TYPE="remote"
-    SOURCE_ENV=$2
-    SOURCE_ENV_CFG=$2
     ;;
   *)
     echo "Invalid environment $2."
     exit 1
 esac
+SOURCE_ENV=$2
 
 if [ $3 ]
 then
@@ -94,9 +86,11 @@ else
   OUT="$SOURCE_ENV-`date "+%Y-%m-%d-%H%M%S"`.tgz"
 fi
 
-get_ssh_login $SOURCE_ENV_CFG
+get_ssh_login $SOURCE_ENV
 SOURCE_HOST=$_HOST
 SOURCE_SSH_USER=$_SSH_USER
+
+get_remote_cwd $SOURCE_ENV
 
 echo -e "From:\t\t$SOURCE_HOST
 Backup archive:\t$DIR/$OUT"

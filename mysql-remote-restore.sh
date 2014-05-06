@@ -47,27 +47,21 @@ FILE=`echo $2 | rev | cut -d"/" -f1 | rev`
 case $3 in
   local|intranet)
     TARGET_TYPE="local"
-    TARGET_ENV=$3
-    TARGET_ENV_CFG=$3
     ;;
-  staging)
+  staging|production)
     TARGET_TYPE="remote"
-    TARGET_ENV=$3
-    TARGET_ENV_CFG=$3
-    ;;
-  production)
-    TARGET_TYPE="remote"
-    TARGET_ENV=$3
-    TARGET_ENV_CFG=$3
     ;;
   *)
     echo "Invalid environment $3."
     exit 1
 esac
+TARGET_ENV=$3
 
-get_ssh_login $TARGET_ENV_CFG
+get_ssh_login $TARGET_ENV
 TARGET_HOST=$_HOST
 TARGET_SSH_USER=$_SSH_USER
+
+get_remote_cwd $TARGET_ENV
 
 echo -e "From:\t$ARCHIVE"
 echo -e "To:\t$TARGET_HOST
