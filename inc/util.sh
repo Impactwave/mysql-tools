@@ -15,6 +15,11 @@ while getopts "h:e:t:" opt; do
       ;;
   esac
 done
+if [ "$ENV" == "production" ]; then
+  CFG_ENV=""
+else
+  CFG_ENV="$1"
+fi
 
 #---------------------------------
 
