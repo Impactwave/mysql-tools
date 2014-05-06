@@ -9,7 +9,6 @@ CONFIG_PATH="src/config"
 ENV="local"
 [ $ENV_NAME ] && ENV=$ENV_NAME
 OENV=$ENV
-
 while getopts "h:e:t:" opt; do
   case $opt in
     e)
@@ -39,13 +38,18 @@ timer()
 
 get_db_login()
 {
+  if [ "$1" == "production" ]; then
+    _ENV=""
+  else
+    _ENV="$1"
+  fi
   if [ -z "$HOST" ]
   then
-    HOST=`awk -F\' '/'\''host'\''/{print $4;exit}' $CONFIG_PATH/$ENV/database.php`
+    HOST=`awk -F\' '/'\''host'\''/{print $4;exit}' $CONFIG_PATH/$_ENV/database.php`
   fi
-  MYSQL_USER=`awk -F\' '/'\''username'\''/{print $4;exit}' $CONFIG_PATH/$ENV/database.php`
+  MYSQL_USER=`awk -F\' '/'\''username'\''/{print $4;exit}' $CONFIG_PATH/$_ENV/database.php`
   # Export the password to be used by the mysql command:
-  export MYSQL_PWD=`awk -F\' '/'\''password'\''/{print $4;exit}' $CONFIG_PATH/$ENV/database.php`
+  export MYSQL_PWD=`awk -F\' '/'\''password'\''/{print $4;exit}' $CONFIG_PATH/$_ENV/database.php`
 }
 
 get_ssh_login()
