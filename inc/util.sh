@@ -6,15 +6,12 @@ CONFIG_PATH="src/config"
 # Get the current environment name
 #---------------------------------
 
-ENV="local"
-[ $ENV_NAME ] && ENV=$ENV_NAME
-while getopts "h:e:t:" opt; do
-  case $opt in
-    e)
-      ENV=$OPTARG
-      ;;
-  esac
-done
+# If the caller has not set ENV, set it now.
+if [ -z "$ENV" ]; then
+  ENV="local"
+  [ $ENV_NAME ] && ENV=$ENV_NAME
+fi
+
 if [ "$ENV" == "production" ]; then
   CFG_ENV=""
 else

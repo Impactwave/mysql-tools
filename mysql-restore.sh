@@ -4,9 +4,12 @@ echo "-----------------------
 Restore database backup
 -----------------------
 "
-#Note: options must be extracted now, otherwise they'll be lost.
+# Allow the user to override the enviroment BEFORE the common scripts are included.
+# That capability requires all options to be parsed now.
 while getopts "h:e:" opt; do
   case $opt in
+    e)
+      ENV=$OPTARG;;
     h)
       HOST="$OPTARG";;
     \?)
