@@ -1,25 +1,10 @@
 #!/bin/bash
 
-OBASE=$(pwd)
-cd $(dirname $0)
-LNK=$(readlink $(basename $0)) # Check if path is a symlink
-if [ -n "$LNK" ]; then
-  cd $(dirname $LNK)
-fi
-BASE=$(pwd -P)
-cd $OBASE
-
-source $BASE/inc/util.sh
-source $BASE/config/config.sh
-
-BACKUP_OTIONS="--compress --create-options --routines --extended-insert --quick --single-transaction --skip-dump-date"
-MYSQL_5_6_OPTIONS=" --set-gtid-purged=OFF"
-
 echo "----------------------
 Backup MySQL databases
 ----------------------
 "
-
+#Note: options must be extracted now, otherwise they'll be lost.
 while getopts "h:e:t:" opt; do
   case $opt in
     h)
@@ -34,6 +19,21 @@ while getopts "h:e:t:" opt; do
   esac
 done
 shift $((OPTIND-1))
+
+OBASE=$(pwd)
+cd $(dirname $0)
+LNK=$(readlink $(basename $0)) # Check if path is a symlink
+if [ -n "$LNK" ]; then
+  cd $(dirname $LNK)
+fi
+BASE=$(pwd -P)
+cd $OBASE
+
+source $BASE/inc/util.sh
+source $BASE/config/config.sh
+
+BACKUP_OTIONS="--compress --create-options --routines --extended-insert --quick --single-transaction --skip-dump-date"
+MYSQL_5_6_OPTIONS=" --set-gtid-purged=OFF"
 
 if [ $# -lt 1 -o $# -gt 3 ]
 then

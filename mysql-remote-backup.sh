@@ -1,22 +1,11 @@
 #!/bin/bash
 
-OBASE=$(pwd)
-cd $(dirname $0)
-LNK=$(readlink $(basename $0)) # Check if path is a symlink
-if [ -n "$LNK" ]; then
-  cd $(dirname $LNK)
-fi
-BASE=$(pwd -P)
-cd $OBASE
-
-source $BASE/inc/util.sh
-source $BASE/config/config.sh
-
 echo "-----------------------------
 Backup remote MySQL databases
 -----------------------------
 "
-while getopts "h:e:t:" opt; do
+#Note: options must be extracted now, otherwise they'll be lost.
+while getopts "t:" opt; do
   case $opt in
     t)
       TABLES="-t \"$OPTARG\""
@@ -28,6 +17,18 @@ while getopts "h:e:t:" opt; do
   esac
 done
 shift $((OPTIND-1))
+
+OBASE=$(pwd)
+cd $(dirname $0)
+LNK=$(readlink $(basename $0)) # Check if path is a symlink
+if [ -n "$LNK" ]; then
+  cd $(dirname $LNK)
+fi
+BASE=$(pwd -P)
+cd $OBASE
+
+source $BASE/inc/util.sh
+source $BASE/config/config.sh
 
 if [ $# -lt 2 -o $# -gt 4 ]
 then

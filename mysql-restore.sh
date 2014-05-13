@@ -1,5 +1,21 @@
 #!/bin/bash
 
+echo "-----------------------
+Restore database backup
+-----------------------
+"
+#Note: options must be extracted now, otherwise they'll be lost.
+while getopts "h:e:" opt; do
+  case $opt in
+    h)
+      HOST="$OPTARG";;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      exit 1
+  esac
+done
+shift $((OPTIND-1))
+
 OBASE=$(pwd)
 cd $(dirname $0)
 LNK=$(readlink $(basename $0)) # Check if path is a symlink
@@ -11,22 +27,6 @@ cd $OBASE
 
 source $BASE/inc/util.sh
 source $BASE/config/config.sh
-
-echo "-----------------------
-Restore database backup
------------------------
-"
-
-while getopts "h:e:" opt; do
-  case $opt in
-    h)
-      HOST="$OPTARG";;
-    \?)
-      echo "Invalid option: -$OPTARG" >&2
-      exit 1
-  esac
-done
-shift $((OPTIND-1))
 
 if [ $# -ne 2 ]
 then
