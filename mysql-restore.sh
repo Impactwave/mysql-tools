@@ -84,6 +84,7 @@ then
 fi
 
 echo "Extracting backup archive..."
+mkdir -p $TMP_DIR
 rm -f $TMP_DIR/$MAINDB-dump.sql
 tar -zxf $2 -C $TMP_DIR
 [ $? -ne 0 ] && exit 1
