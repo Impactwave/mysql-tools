@@ -1,6 +1,37 @@
 #!/bin/bash
 
-CONFIG_PATH="src/config"
+#-------------------------------------------------------
+# Set Laravel's relevant paths as environment variables.
+# $ROOT:        public web directory.
+# $APP_PATH:    application directory.
+# $CONFIG_PATH: configuration directory.
+# $PUBLIC_HTML: directory where index.php is located.
+#
+# It searches for index.php on the current folder or on
+# ../public_html
+# It then runs a modified index.php to extract the
+# relevant configuration info.
+#-------------------------------------------------------
+
+re="\\\$app ?= ?[^']*'([^']*)"
+if [ -f index.php ]; then
+  index=$(cat index.php)
+  PUBLIC_HTML='.'
+else
+  if [ -f ../public_html/index.php ]; then
+    index=$(cat ../public_html/index.php)
+    PUBLIC_HTML='../public_html'
+  else
+    echo "Can't find index.php"
+    exit 1
+  fi
+fi
+index=`echo "$index" | sed "s/\\\$app->run()/echo app_path();exit/"`
+pushd . > /dev/null
+cd $PUBLIC_HTML
+APP_PATH=$(echo "$index" | php)
+popd > /dev/null
+CONFIG_PATH="$APP_PATH/config"
 
 #---------------------------------
 # Get the current environment name
