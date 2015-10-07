@@ -1,13 +1,21 @@
 {
-    "name": "impactwave/mysql-tools",
-    "description": "Command-line shell scripts for managing MySQL databases on Laravel-based web applications.",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Claudio Silva",
-            "email": "claudio.silva@impactwave.com"
-        }
-    ],
-    "require": {},
-    "bin": ["mysql-backup.sh", "mysql-remote-backup.sh", "mysql-remote-restore.sh", "mysql-restore.sh", "mysql-tunnel.sh", "mysql-transfer.sh"]
+  "name": "impactwave/mysql-tools",
+  "description": "Command-line shell scripts for managing MySQL databases on Laravel-based web applications.",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Claudio Silva",
+      "email": "claudio.silva@impactwave.com"
+    }
+  ],
+  "require": {},
+  "bin": [
+    "mysql-backup.sh",
+    "mysql-remote-backup.sh",
+    "mysql-remote-restore.sh",
+    "mysql-restore.sh",
+    "mysql-tunnel.sh",
+    "mysql-transfer.sh",
+    "mysql-csv-to-sql.php"
+  ]
 }
