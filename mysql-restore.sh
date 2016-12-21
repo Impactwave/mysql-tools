@@ -93,6 +93,11 @@ if [ -n "$MAIN" ]
 then
   if [ -f $TMP_DIR/$MAIN ]
   then
+    # Remove DEFINER=xxx SQL statements to prevent the 'you need (at least one of) the SUPER privilege(s) for this operation' error.
+    php <<PHP
+<?php
+file_put_contents('$TMP_DIR/$MAIN', preg_replace('#DEFINER=[^\s\*]+#', '', file_get_contents('$TMP_DIR/$MAIN')));
+PHP
     echo "Restoring database '$MAINDB'..."
     mysql -u $MYSQL_USER -h $HOST $MAINDB < $TMP_DIR/$MAIN
     [ $? -ne 0 ] && exit 1
