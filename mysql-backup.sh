@@ -80,16 +80,16 @@ esac
 
 get_db_login $ENV
 
-if [ $2 ]
+if [ "$2" ]
 then
-  DIR=$2
+  DIR="$2"
 else
   DIR="backups"
 fi
 
-if [ $3 ]
+if [ "$3" ]
 then
-  OUT=$3
+  OUT="$3"
 else
   OUT="$ENV-`date "+%Y-%m-%d-%H%M%S"`.tgz"
 fi
@@ -109,16 +109,19 @@ START=$(timer)
 ver=`mysqldump -u $MYSQL_USER -h $HOST --version`
 [[ $ver =~ Distrib\ 5\.([0-9]+) ]]
 ver=${BASH_REMATCH[1]}
-[ -z $ver ] && echo "MySQL v5.x was not found." && exit 1
+[ -z "$ver" ] && echo "MySQL v5.x was not found." && exit 1
 [ "$ver" -gt 5 ] && BACKUP_OTIONS="$BACKUP_OTIONS $MYSQL_5_6_OPTIONS"
 
 echo "Dumping database '$MAINDB'..."
-mkdir -p $TMP_DIR
-mysqldump -u $MYSQL_USER -h $HOST $BACKUP_OTIONS $MAINDB $TABLES > $TMP_DIR/$MAIN
+mkdir -p "$TMP_DIR"
+# Note: The PHP pipe script removes 'DEFINER=xxx' SQL statements to prevent the 'you need (at least one of) the SUPER privilege(s) for this operation' error.
+mysqldump -u $MYSQL_USER -h $HOST $BACKUP_OTIONS $MAINDB "$TABLES" | php -r "while (!feof (STDIN)) echo preg_replace ('#DEFINER=[^\s\*]+#', '', fgets (STDIN));" > "$TMP_DIR/$MAIN"
+
+
 [ $? -ne 0 ] && exit 1
 
 echo "Generating backup file..."
-mkdir -p $DIR
-tar -zcf $DIR/$OUT -C $TMP_DIR $MAIN
+mkdir -p "$DIR"
+tar -zcf "$DIR/$OUT" -C "$TMP_DIR" $MAIN
 
 printf '\nElapsed time: %s\n\n' $(timer $START)

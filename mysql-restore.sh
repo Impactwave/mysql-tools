@@ -77,38 +77,24 @@ Temp.directory:\t$TMP_DIR
 
 START=$(timer)
 
-if [ ! -f $2 ]
+if [ ! -f "$2" ]
 then
   echo "File $2 not found."
   exit 1
 fi
 
 echo "Extracting backup archive..."
-mkdir -p $TMP_DIR
-rm -f $TMP_DIR/$MAINDB-dump.sql
-tar -zxf $2 -C $TMP_DIR
+mkdir -p "$TMP_DIR"
+rm -f "$TMP_DIR/$MAINDB-dump.sql"
+tar -zxf "$2" -C "$TMP_DIR"
 [ $? -ne 0 ] && exit 1
 
 if [ -n "$MAIN" ]
 then
-  if [ -f $TMP_DIR/$MAIN ]
+  if [ -f "$TMP_DIR/$MAIN" ]
   then
-    echo "Setting up SQL scripts..."
-    # Remove DEFINER=xxx SQL statements to prevent the 'you need (at least one of) the SUPER privilege(s) for this operation' error.
-    php <<PHP
-<?php
-\$in  = fopen ('$TMP_DIR/$MAIN', 'r');
-\$out = fopen ('$TMP_DIR/$MAIN.new', 'w');
-while (!feof (\$in)) {
-  \$line = preg_replace ('#DEFINER=[^\s\*]+#', '', fgets (\$in));
-  fputs (\$out, \$line);
-}
-fclose (\$in);
-fclose (\$out);
-PHP
-    mv $TMP_DIR/$MAIN.new $TMP_DIR/$MAIN
     echo "Restoring database '$MAINDB'..."
-    mysql -u $MYSQL_USER -h $HOST $MAINDB < $TMP_DIR/$MAIN
+    mysql -u $MYSQL_USER -h $HOST $MAINDB < "$TMP_DIR/$MAIN"
     [ $? -ne 0 ] && exit 1
   else
     echo "$MAIN was not found."
