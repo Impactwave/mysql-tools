@@ -92,6 +92,8 @@ get_ssh_login()
   fi
   _HOST=`awk -F\' '/'\''MySQL_host'\''/{print $4;exit}' $CONFIG_PATH/$_ENV/settings.php`
   _SSH_USER=`awk -F\' '/'\''SSH_user'\''/{print $4;exit}' $CONFIG_PATH/$_ENV/settings.php`
+  _SSH_PORT=`awk -F\' '/'\''SSH_port'\''/{print $3;exit}' $CONFIG_PATH/$_ENV/settings.php`
+  _SSH_PORT=$(echo $_SSH_PORT | tr -dc '0-9')
 }
 
 get_remote_cwd()

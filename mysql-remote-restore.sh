@@ -60,6 +60,7 @@ TARGET_ENV=$3
 get_ssh_login $TARGET_ENV
 TARGET_HOST=$_HOST
 TARGET_SSH_USER=$_SSH_USER
+TARGET_SSH_PORT=$_SSH_PORT
 
 get_remote_cwd $TARGET_ENV
 
@@ -75,12 +76,12 @@ then
   [ $? -ne 0 ] && exit 1
 else
   echo "Transferring backup to $TARGET_SSH_USER@$TARGET_HOST"
-  ssh $TARGET_SSH_USER@$TARGET_HOST "mkdir -p $REMOTE_CWD/$TMP_DIR" # create the target directory if it doesn't exist
-  scp $ARCHIVE $TARGET_SSH_USER@$TARGET_HOST:$REMOTE_CWD/$TMP_DIR
+  ssh $TARGET_SSH_USER@$TARGET_HOST -p $TARGET_SSH_PORT "mkdir -p $REMOTE_CWD/$TMP_DIR" # create the target directory if it doesn't exist
+  scp -P $TARGET_SSH_PORT $ARCHIVE $TARGET_SSH_USER@$TARGET_HOST:$REMOTE_CWD/$TMP_DIR
   [ $? -ne 0 ] && exit 1
 
   echo "Connecting to $TARGET_SSH_USER@$TARGET_HOST"
-  ssh $TARGET_SSH_USER@$TARGET_HOST "cd $REMOTE_CWD; $BIN_DIR/$RESTORE_SCRIPT -h localhost -e $TARGET_ENV $DATABASES $TMP_DIR/$FILE"
+  ssh $TARGET_SSH_USER@$TARGET_HOST -p $TARGET_SSH_PORT "cd $REMOTE_CWD; $BIN_DIR/$RESTORE_SCRIPT -h localhost -e $TARGET_ENV $DATABASES $TMP_DIR/$FILE"
   [ $? -ne 0 ] && exit 1
 fi
 

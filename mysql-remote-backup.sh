@@ -90,6 +90,7 @@ fi
 get_ssh_login $SOURCE_ENV
 SOURCE_HOST=$_HOST
 SOURCE_SSH_USER=$_SSH_USER
+SOURCE_SSH_PORT=$_SSH_PORT
 
 get_remote_cwd $SOURCE_ENV
 
@@ -111,11 +112,11 @@ then
   [ $? -ne 0 ] && exit 1
 else
   echo "Connecting to $SOURCE_SSH_USER@$SOURCE_HOST"
-  ssh $SOURCE_SSH_USER@$SOURCE_HOST "cd $REMOTE_CWD; $BIN_DIR/$BACKUP_SCRIPT $TABLES -h localhost -e $SOURCE_ENV $DATABASES $TMP_DIR $ARCHIVE"
+  ssh $SOURCE_SSH_USER@$SOURCE_HOST -p $SOURCE_SSH_PORT "cd $REMOTE_CWD; $BIN_DIR/$BACKUP_SCRIPT $TABLES -h localhost -e $SOURCE_ENV $DATABASES $TMP_DIR $ARCHIVE"
   [ $? -ne 0 ] && exit 1
 
   echo "Transferring backup to local computer"
-  scp $SOURCE_SSH_USER@$SOURCE_HOST:$REMOTE_CWD/$TMP_DIR/$ARCHIVE $DIR/$OUT
+  scp -P $SOURCE_SSH_PORT $SOURCE_SSH_USER@$SOURCE_HOST:$REMOTE_CWD/$TMP_DIR/$ARCHIVE $DIR/$OUT
   [ $? -ne 0 ] && exit 1
 fi
 
