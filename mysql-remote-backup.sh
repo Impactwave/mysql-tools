@@ -7,7 +7,7 @@ Backup remote MySQL databases
 N_FLAG=''
 
 #Note: options must be extracted now, otherwise they'll be lost.
-while getopts "t:" opt; do
+while getopts "t:n" opt; do
   case $opt in
     t)
       TABLES="-t \"$OPTARG\""
