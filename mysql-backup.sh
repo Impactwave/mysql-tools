@@ -41,6 +41,7 @@ source $BASE/config/config.sh
 
 BACKUP_OTIONS="--compress --create-options --routines --extended-insert --quick --single-transaction --skip-dump-date"
 MYSQL_5_6_OPTIONS=" --set-gtid-purged=OFF"
+MAIN="dump.sql"
 
 if [ $# -lt 1 -o $# -gt 3 ]
 then
@@ -61,14 +62,14 @@ Options:
 
 The specified databases will be backed up from the local MySQL server by default, unless overriden by the -h option or the \$ENV_NAME environment variable.
 The environment name determines which configuration file will be read to obtain database connection information.
-The backup archive will contain a file named '$MAINDB-dump.sql'.
+The backup archive will contain a file named 'dump.sql'.
 "
   exit 1
 fi
 
 case $1 in
   $MAINDB)
-    MAIN="$MAINDB-dump.sql"
+    # OK, valid
     ;;
   *)
     echo "Invalid parameter: $1"

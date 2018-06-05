@@ -35,6 +35,8 @@ cd $OBASE
 source $BASE/inc/util.sh
 source $BASE/config/config.sh
 
+MAIN="dump.sql"
+
 if [ $# -ne 2 ]
 then
   echo "Usage: $(basename $0) [options] databases archive_name
@@ -58,7 +60,7 @@ fi
 
 case $1 in
   $MAINDB)
-    MAIN="$MAINDB-dump.sql"
+    # OK, valid
     ;;
   *)
     echo "Invalid parameter: $1"
