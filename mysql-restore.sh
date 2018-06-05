@@ -4,16 +4,20 @@ echo "-----------------------
 Restore database backup
 -----------------------
 "
+INTERACTIVE=1
+
 # Allow the user to override the enviroment BEFORE the common scripts are included.
 # That capability requires all options to be parsed now.
-while getopts "h:e:" opt; do
+while getopts "h:e:n" opt; do
   case $opt in
     e)
       ENV=$OPTARG;;
     h)
       HOST="$OPTARG";;
+    n)
+      INTERACTIVE=0;;
     \?)
-      echo "Invalid option: -$OPTARG" >&2
+      echo "Invalid option: -$opt" >&2
       exit 1
   esac
 done
@@ -43,6 +47,7 @@ Options:
   -h hostname   Connect to MySQL on hostname / IP address; default = depends on the environment (see below).
   -e envname    Use the specified environment; default = \$ENV_NAME or 'local'.
                 Environments: local|intranet|staging|production
+  -n            Do not ask any interactive questions.
 
 The specified databases will be restored to the local MySQL server by default, unless overriden by the -h option or the \$ENV_NAME environment variable.
 The environment name determines which configuration file will be read to obtain database connection information.
@@ -74,6 +79,11 @@ echo -e "MySQL host:\t$HOST
 Backup archive:\t$2
 Temp.directory:\t$TMP_DIR
 "
+
+if (($INTERACTIVE)); then
+  read -p "Press Enter to start or Ctrl+C to cancel..."
+  echo
+fi
 
 START=$(timer)
 

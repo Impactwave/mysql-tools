@@ -1,5 +1,26 @@
 #!/bin/bash
 
+echo "----------------------------------------
+Transfer MySQL databases between servers
+----------------------------------------
+"
+N_FLAG=''
+
+#Note: options must be extracted now, otherwise they'll be lost.
+while getopts "t:n" opt; do
+  case $opt in
+    t)
+      TABLES="-t \"$OPTARG\""
+      ;;
+    n)
+      N_FLAG='-n';;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      exit 1
+  esac
+done
+shift $((OPTIND-1))
+
 OBASE=$(pwd)
 cd $(dirname $0)
 LNK=$(readlink $(basename $0)) # Check if path is a symlink
@@ -11,11 +32,6 @@ cd $OBASE
 
 source $BASE/inc/util.sh
 source $BASE/config/config.sh
-
-echo "----------------------------------------
-Transfer MySQL databases between servers
-----------------------------------------
-"
 
 if [ $# -ne 3 ]
 then
@@ -29,24 +45,13 @@ Parameters:
 Options:
   -t \"tables\"     Space-delimited list of tables to be backed up (ex: -t table1 table2).
                   You should use this option with a specific database selected.
+  -n              Do not ask any interactive questions.
 
 The specified databases will be backed up from the source MySQL server and restored on the target MySQL server.
 The environment names determine which configuration files will be read to obtain database and SSH connection information.
 "
   exit 1
 fi
-
-while getopts "t:" opt; do
-  case $opt in
-    t)
-      TABLES="-t \"$OPTARG\""
-      ;;
-    \?)
-      echo "Invalid option: -$OPTARG" >&2
-      exit 1
-  esac
-done
-shift $((OPTIND-1))
 
 case $1 in
   $MAINDB)
@@ -96,17 +101,22 @@ TARGET_SSH_PORT=$_SSH_PORT
 echo -e "From:\t$SOURCE_HOST"
 echo -e "To:\t$TARGET_HOST"
 
+if [ -z "$N_FLAG" ]; then
+  read -p "Press Enter to start or Ctrl+C to cancel..."
+  echo
+fi
+
 START=$(timer)
 
 if [ $SOURCE_TYPE = "local" ]
 then
-  $BIN_DIR/$BACKUP_SCRIPT $TABLES -e $SOURCE_ENV $DATABASES $TMP_DIR $ARCHIVE
+  $BIN_DIR/$BACKUP_SCRIPT $TABLES -e $SOURCE_ENV $N_FLAG $DATABASES $TMP_DIR $ARCHIVE
   [ $? -ne 0 ] && exit 1
 else
   get_remote_cwd $SOURCE_ENV
 
   echo "Connecting to $SOURCE_SSH_USER@$SOURCE_HOST"
-  ssh $SOURCE_SSH_USER@$SOURCE_HOST -p $SOURCE_SSH_PORT "cd $REMOTE_CWD; $BIN_DIR/$BACKUP_SCRIPT $TABLES -h localhost -e $SOURCE_ENV $DATABASES $TMP_DIR $ARCHIVE"
+  ssh $SOURCE_SSH_USER@$SOURCE_HOST -p $SOURCE_SSH_PORT "cd $REMOTE_CWD; $BIN_DIR/$BACKUP_SCRIPT $TABLES -h localhost -e $SOURCE_ENV $N_FLAG $DATABASES $TMP_DIR $ARCHIVE"
   [ $? -ne 0 ] && exit 1
 
   echo "Transferring backup to local computer"
@@ -116,7 +126,7 @@ fi
 
 if [ $TARGET_TYPE = "local" ]
 then
-  $BIN_DIR/$RESTORE_SCRIPT -e $TARGET_ENV $DATABASES $TMP_DIR/$ARCHIVE
+  $BIN_DIR/$RESTORE_SCRIPT -e $TARGET_ENV $N_FLAG $DATABASES $TMP_DIR/$ARCHIVE
   [ $? -ne 0 ] && exit 1
 else
   get_remote_cwd $TARGET_ENV
@@ -127,7 +137,7 @@ else
   [ $? -ne 0 ] && exit 1
 
   echo "Connecting to $TARGET_SSH_USER@$TARGET_HOST"
-  ssh $TARGET_SSH_USER@$TARGET_HOST -p $TARGET_SSH_PORT "cd $REMOTE_CWD; $BIN_DIR/$RESTORE_SCRIPT -h localhost -e $TARGET_ENV $DATABASES $TMP_DIR/$ARCHIVE"
+  ssh $TARGET_SSH_USER@$TARGET_HOST -p $TARGET_SSH_PORT "cd $REMOTE_CWD; $BIN_DIR/$RESTORE_SCRIPT -h localhost -e $TARGET_ENV $N_FLAG $DATABASES $TMP_DIR/$ARCHIVE"
   [ $? -ne 0 ] && exit 1
 fi
 

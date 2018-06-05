@@ -4,9 +4,11 @@ echo "----------------------
 Backup MySQL databases
 ----------------------
 "
+INTERACTIVE=1
+
 # Allow the user to override the enviroment BEFORE the common scripts are included.
 # That capability requires all options to be parsed now.
-while getopts "h:e:t:" opt; do
+while getopts "h:e:t:n" opt; do
   case $opt in
     e)
       ENV=$OPTARG;;
@@ -16,6 +18,8 @@ while getopts "h:e:t:" opt; do
       TABLES="--tables $OPTARG"
       TABLES_STR="$OPTARG"
       ;;
+    n)
+      INTERACTIVE=0;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
       exit 1
@@ -53,6 +57,7 @@ Options:
                   Environments: local|intranet|staging|production
   -t \"tables\"     Space-delimited list of tables to be backed up (ex: -t table1 table2).
                   You should use this option with a specific database selected.
+  -n              Do not ask any interactive questions.
 
 The specified databases will be backed up from the local MySQL server by default, unless overriden by the -h option or the \$ENV_NAME environment variable.
 The environment name determines which configuration file will be read to obtain database connection information.
@@ -101,7 +106,12 @@ if [ "$TABLES" ]
 then
   echo -e "Tables:\t\t$TABLES_STR"
 fi
-echo ""
+echo
+
+if (($INTERACTIVE)); then
+  read -p "Press Enter to start or Ctrl+C to cancel..."
+  echo
+fi
 
 START=$(timer)
 

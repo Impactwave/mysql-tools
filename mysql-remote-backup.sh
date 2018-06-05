@@ -4,6 +4,8 @@ echo "-----------------------------
 Backup remote MySQL databases
 -----------------------------
 "
+N_FLAG=''
+
 #Note: options must be extracted now, otherwise they'll be lost.
 while getopts "t:" opt; do
   case $opt in
@@ -11,6 +13,8 @@ while getopts "t:" opt; do
       TABLES="-t \"$OPTARG\""
       TABLES_STR="$OPTARG"
       ;;
+    n)
+      N_FLAG='-n';;
     \?)
       echo "Invalid option: -$OPTARG" >&2
       exit 1
@@ -43,6 +47,7 @@ Parameters:
 Options:
   -t \"tables\"     Space-delimited list of tables to be backed up (ex: -t table1 table2).
                   You should use this option with a specific database selected.
+  -n              Do not ask any interactive questions.
 
 The specified databases will be backed up from the remote MySQL server into the local machine.
 The environment name determines which configuration file will be read to obtain database connection information.
@@ -102,17 +107,22 @@ then
 fi
 echo ""
 
+if [ -z "$N_FLAG" ]; then
+  read -p "Press Enter to start or Ctrl+C to cancel..."
+  echo
+fi
+
 START=$(timer)
 
 mkdir -p $DIR
 
 if [ $SOURCE_TYPE = "local" ]
 then
-  $BIN_DIR/$BACKUP_SCRIPT $TABLES -e $SOURCE_ENV $DATABASES $DIR $OUT
+  $BIN_DIR/$BACKUP_SCRIPT $TABLES -e $SOURCE_ENV $N_FLAG $DATABASES $DIR $OUT
   [ $? -ne 0 ] && exit 1
 else
   echo "Connecting to $SOURCE_SSH_USER@$SOURCE_HOST"
-  ssh $SOURCE_SSH_USER@$SOURCE_HOST -p $SOURCE_SSH_PORT "cd $REMOTE_CWD; $BIN_DIR/$BACKUP_SCRIPT $TABLES -h localhost -e $SOURCE_ENV $DATABASES $TMP_DIR $ARCHIVE"
+  ssh $SOURCE_SSH_USER@$SOURCE_HOST -p $SOURCE_SSH_PORT "cd $REMOTE_CWD; $BIN_DIR/$BACKUP_SCRIPT $TABLES -h localhost -e $SOURCE_ENV $N_FLAG $DATABASES $TMP_DIR $ARCHIVE"
   [ $? -ne 0 ] && exit 1
 
   echo "Transferring backup to local computer"
