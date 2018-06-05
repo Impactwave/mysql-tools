@@ -101,6 +101,7 @@ else
 fi
 
 echo -e "MySQL host:\t$HOST
+Database:\t$MAINDB
 Backup archive:\t$DIR/$OUT
 Temp.directory:\t$TMP_DIR"
 if [ "$TABLES" ]

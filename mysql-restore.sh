@@ -78,6 +78,7 @@ esac
 get_db_login $ENV
 
 echo -e "MySQL host:\t$HOST
+Database:\t$MAINDB
 Backup archive:\t$2
 Temp.directory:\t$TMP_DIR
 "
