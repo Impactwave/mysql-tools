@@ -5,7 +5,6 @@
 # $ROOT:        public web directory.
 # $APP_PATH:    application directory.
 # $CONFIG_PATH: configuration directory.
-# $PUBLIC_HTML: directory where index.php is located.
 #
 # It searches for index.php on the current folder or on
 # ../public_html
@@ -13,24 +12,19 @@
 # relevant configuration info.
 #-------------------------------------------------------
 
+# The APP_DIR environment variable is optional and allows you to specify where to look for the Laravel app. relative to the project's root directory
 re="\\\$app ?= ?[^']*'([^']*)"
-if [ -f index.php ]; then
-  index=$(cat index.php)
-  PUBLIC_HTML='.'
+if [ -d config ]; then
+  APP_PATH="`pwd`"
 else
-  if [ -f ../public_html/index.php ]; then
-    index=$(cat ../public_html/index.php)
-    PUBLIC_HTML='../public_html'
+  if [ -d "$APP_DIR/config" ]; then
+    APP_PATH="`pwd`/$APP_DIR"
   else
-    echo "Can't find index.php"
+    echo "Can't find the config directory. Tip: set the APP_DIR env. variable to a relative path from your current working directory."
     exit 1
   fi
 fi
-index=`echo "$index" | sed "s/\\\$app->run()/echo app_path();exit/"`
-pushd . > /dev/null
-cd $PUBLIC_HTML
-APP_PATH=$(echo "$index" | php)
-popd > /dev/null
+
 CONFIG_PATH="$APP_PATH/config"
 
 #---------------------------------
