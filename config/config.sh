@@ -14,4 +14,9 @@ RESTORE_SCRIPT="mysql-restore.sh"
 ARCHIVE="mysql-dump.tgz"
 
 # Get main database name from the configuration file for the current environment
-MAINDB=`awk -F\' '/'\''database'\''/{print $4;exit}' $CONFIG_PATH/$CFG_ENV/database.php`
+if [ -f .env ]; then
+  source .env
+  MAINDB="$DB_DATABASE"
+else
+  MAINDB=`awk -F\' '/'\''database'\''/{print $4;exit}' $CONFIG_PATH/$CFG_ENV/database.php`
+fi
