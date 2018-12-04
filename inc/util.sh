@@ -75,6 +75,15 @@ get_db_login()
   MYSQL_USER=`awk -F\' '/'\''username'\''/{print $4;exit}' $CONFIG_PATH/$_ENV/database.php`
   # Export the password to be used by the mysql command:
   export MYSQL_PWD=`awk -F\' '/'\''password'\''/{print $4;exit}' $CONFIG_PATH/$_ENV/database.php`
+  if [ "$HOST" == "DB_HOST" ]; then
+    HOST=$DB_HOST
+  fi
+  if [ "$MYSQL_USER" == "DB_USERNAME" ]; then
+    MYSQL_USER=$DB_USERNAME
+  fi
+  if [ "$MYSQL_PWD" == "DB_HOST" ]; then
+    export MYSQL_PWD=$DB_PASSWORD
+  fi
 }
 
 get_ssh_login()
