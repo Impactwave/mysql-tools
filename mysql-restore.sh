@@ -84,8 +84,8 @@ Temp.directory:\t$TMP_DIR
 "
 
 if (($INTERACTIVE)); then
-  read -p "Press Enter to start or Ctrl+C to cancel..."
-  echo
+  echo "Press Enter to start or Ctrl+C to cancel..."
+  read
 fi
 
 START=$(timer)

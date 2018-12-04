@@ -81,7 +81,7 @@ get_db_login()
   if [ "$MYSQL_USER" == "DB_USERNAME" ]; then
     MYSQL_USER=$DB_USERNAME
   fi
-  if [ "$MYSQL_PWD" == "DB_HOST" ]; then
+  if [ "$MYSQL_PWD" == "DB_PASSWORD" ]; then
     export MYSQL_PWD=$DB_PASSWORD
   fi
 }
