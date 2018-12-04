@@ -33,7 +33,7 @@ cd $OBASE
 source $BASE/inc/util.sh
 source $BASE/config/config.sh
 
-if [ $# -ne 3 ]
+if [ $# -ne 4 ]
 then
   echo "Usage: $(basename $0) [options] source_database target_database source_env target_env
 
