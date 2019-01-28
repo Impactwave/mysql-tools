@@ -119,10 +119,11 @@ START=$(timer)
 
 # Detect MySQL version; if >= 5.6, append extra options.
 ver=`mysqldump -u $MYSQL_USER -h $HOST --version`
-[[ $ver =~ Distrib\ 5\.([0-9]+) ]]
-ver=${BASH_REMATCH[1]}
-[ -z "$ver" ] && echo "MySQL v5.x was not found." && exit 1
-[ "$ver" -gt 5 ] && BACKUP_OTIONS="$BACKUP_OTIONS $MYSQL_5_6_OPTIONS"
+[[ $ver =~ Distrib\ (5|10)\.([0-9]+) ]]
+maj=${BASH_REMATCH[1]}
+min=${BASH_REMATCH[2]}
+[ -z "$maj" ] && echo "MySQL v5.x or MariaDB 10.x were not found." && exit 1
+[ "$maj" -eq 5 -a "$min" -gt 5 ] && BACKUP_OTIONS="$BACKUP_OTIONS $MYSQL_5_6_OPTIONS"
 
 echo "Dumping database '$MAINDB'..."
 mkdir -p "$TMP_DIR"
