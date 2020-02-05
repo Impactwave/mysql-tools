@@ -135,8 +135,16 @@ min=${BASH_REMATCH[2]}
 
 echo "Dumping database '$MAINDB'..."
 mkdir -p "$TMP_DIR"
-# Note: The PHP pipe script removes 'DEFINER=xxx' SQL statements to prevent the 'you need (at least one of) the SUPER privilege(s) for this operation' error.
-mysqldump -u $MYSQL_USER -h $HOST $BACKUP_OTIONS $MAINDB $TABLES | php -r "while (feof (STDIN) === false) echo preg_replace ('#DEFINER=[^\s\*]+#', '', fgets (STDIN));" > "$TMP_DIR/$MAIN"
+
+# Note: The PHP pipe script removes 'DEFINER=xxx' SQL statements to prevent the "you need (at least one of) the SUPER
+# privilege(s) for this operation" error. It also corrects ALTER DATABASE statements to target the correct database,
+# which is important when restoring backups to a database other than the one from which the backup was made.
+transform="while (feof (STDIN) === false) { \$line=fgets (STDIN);"
+transform="$transform \$line=preg_replace ('#DEFINER=[^\s\*]+#', '', \$line);"
+transform="$transform \$line=preg_replace ('#ALTER DATABASE \`.+?\` CHARACTER SET (.+?);#', 'ALTER DATABASE \`$MAINDB\` CHARACTER SET \$1;', \$line);"
+transform="$transform echo \$line; }"
+
+mysqldump -u $MYSQL_USER -h $HOST $BACKUP_OTIONS $MAINDB $TABLES | php -r "$transform" > "$TMP_DIR/$MAIN"
 
 [ $? -ne 0 ] && exit 1
 
