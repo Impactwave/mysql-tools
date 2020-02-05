@@ -120,7 +120,15 @@ fi
 if [ -f "$TMP_FILE" ]
 then
   echo "Restoring database '$MAINDB'..."
-  mysql -u $MYSQL_USER -h $HOST $MAINDB < "$TMP_FILE"
+
+  # Note: The PHP pipe script corrects ALTER DATABASE statements to target the correct database, which is important when
+  # restoring backups to a database other than the one from which the backup was made.
+  transform="while (feof (STDIN) === false) { \$line=fgets (STDIN);"
+  transform="$transform \$line=preg_replace ('#ALTER DATABASE \`.+?\` CHARACTER SET (.+?);#', 'ALTER DATABASE \`$MAINDB\` CHARACTER SET \$1;', \$line);"
+  transform="$transform echo \$line; }"
+
+  #  mysql -u $MYSQL_USER -h $HOST $MAINDB < "$TMP_FILE"
+  cat "$TMP_FILE" | php -r "$transform" | mysql -u $MYSQL_USER -h $HOST $MAINDB
   [ $? -ne 0 ] && exit 1
 else
   echo "$TMP_FILE was not found."
