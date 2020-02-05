@@ -5,10 +5,11 @@ Backup MySQL databases
 ----------------------
 "
 INTERACTIVE=1
+ASK_PASS=
 
 # Allow the user to override the enviroment BEFORE the common scripts are included.
 # That capability requires all options to be parsed now.
-while getopts "h:e:t:n" opt; do
+while getopts "h:e:t:np" opt; do
   case $opt in
     e)
       ENV=$OPTARG;;
@@ -20,8 +21,9 @@ while getopts "h:e:t:n" opt; do
       ;;
     n)
       INTERACTIVE=0;;
-    \?)
-      echo "Invalid option: -$OPTARG" >&2
+    p)
+      ASK_PASS=1;;
+    *)
       exit 1
   esac
 done
@@ -58,6 +60,7 @@ Options:
                   Environments: local|intranet|staging|production
   -t \"tables\"     Space-delimited list of tables to be backed up (ex: -t table1 table2).
                   You should use this option with a specific database selected.
+  -p              Ask for password.
   -n              Do not ask any interactive questions.
 
 The specified databases will be backed up from the local MySQL server by default, unless overriden by the -h option or the \$ENV_NAME environment variable.
@@ -72,7 +75,7 @@ case $1 in
     # OK, valid
     ;;
   *)
-    echo "Invalid parameter: $1"
+    echo "Invalid parameter or unknown database: $1"
     exit 1
 esac
 
@@ -85,6 +88,11 @@ case $ENV in
 esac
 
 get_db_login $ENV
+
+if [ $ASK_PASS ]; then
+  read -p "$MYSQL_USER's password: " MYSQL_PWD
+  export MYSQL_PWD
+fi
 
 if [ "$2" ]
 then
