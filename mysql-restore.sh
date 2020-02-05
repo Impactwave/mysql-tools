@@ -45,7 +45,7 @@ then
 
 Parameters:
   databases     $MAINDB
-  archive_name  The path and file name of the backup archive (a tar.gz or tgz file).
+  archive_name  The path and file name of the backup archive (a tar.gz or tgz file) or dump file (.sql).
 
 Options:
   -h hostname   Connect to MySQL on hostname / IP address; default = depends on the environment (see below).
@@ -104,22 +104,26 @@ then
   exit 1
 fi
 
-echo "Extracting backup archive..."
-mkdir -p "$TMP_DIR"
-rm -f "$TMP_DIR/$MAINDB-dump.sql"
-tar -zxf "$2" -C "$TMP_DIR"
-[ $? -ne 0 ] && exit 1
+ext=${2##*.}
+if [ $ext != 'sql' ];then
+  echo "Extracting backup archive..."
+  mkdir -p "$TMP_DIR"
+  TMP_FILE="$TMP_DIR/$MAIN"
+  rm -f "$TMP_FILE"
+  tar -zxf "$2" -C "$TMP_DIR"
+  [ $? -ne 0 ] && exit 1
+else
+  echo "Using dump file $2"
+  TMP_FILE="$2"
+fi
 
-if [ -n "$MAIN" ]
+if [ -f "$TMP_FILE" ]
 then
-  if [ -f "$TMP_DIR/$MAIN" ]
-  then
-    echo "Restoring database '$MAINDB'..."
-    mysql -u $MYSQL_USER -h $HOST $MAINDB < "$TMP_DIR/$MAIN"
-    [ $? -ne 0 ] && exit 1
-  else
-    echo "$MAIN was not found."
-  fi
+  echo "Restoring database '$MAINDB'..."
+  mysql -u $MYSQL_USER -h $HOST $MAINDB < "$TMP_FILE"
+  [ $? -ne 0 ] && exit 1
+else
+  echo "$TMP_FILE was not found."
 fi
 
 printf '\nElapsed time: %s\n\n' $(timer $START)
