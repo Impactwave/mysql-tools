@@ -90,7 +90,7 @@ esac
 get_db_login $ENV
 
 if [ $ASK_PASS ]; then
-  read -p "$MYSQL_USER's password: " MYSQL_PWD
+  read -sp "$MYSQL_USER's password: " MYSQL_PWD
   export MYSQL_PWD
 fi
 
