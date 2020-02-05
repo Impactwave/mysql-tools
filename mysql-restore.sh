@@ -9,7 +9,7 @@ ASK_PASS=
 
 # Allow the user to override the enviroment BEFORE the common scripts are included.
 # That capability requires all options to be parsed now.
-while getopts "h:e:n" opt; do
+while getopts "h:e:np" opt; do
   case $opt in
     e)
       ENV=$OPTARG;;
