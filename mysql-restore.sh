@@ -5,6 +5,7 @@ Restore database backup
 -----------------------
 "
 INTERACTIVE=1
+ASK_PASS=
 
 # Allow the user to override the enviroment BEFORE the common scripts are included.
 # That capability requires all options to be parsed now.
@@ -16,8 +17,9 @@ while getopts "h:e:n" opt; do
       HOST="$OPTARG";;
     n)
       INTERACTIVE=0;;
-    \?)
-      echo "Invalid option: -$opt" >&2
+    p)
+      ASK_PASS=1;;
+    *)
       exit 1
   esac
 done
@@ -49,6 +51,7 @@ Options:
   -h hostname   Connect to MySQL on hostname / IP address; default = depends on the environment (see below).
   -e envname    Use the specified environment; default = \$ENV_NAME or 'local'.
                 Environments: local|intranet|staging|production
+  -p            Ask for password.
   -n            Do not ask any interactive questions.
 
 The specified databases will be restored to the local MySQL server by default, unless overriden by the -h option or the \$ENV_NAME environment variable.
@@ -76,6 +79,11 @@ case $ENV in
 esac
 
 get_db_login $ENV
+
+if [ $ASK_PASS ]; then
+  read -p "$MYSQL_USER's password: " MYSQL_PWD
+  export MYSQL_PWD
+fi
 
 echo -e "MySQL host:\t$HOST
 Database:\t$MAINDB
