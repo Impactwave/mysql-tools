@@ -12,7 +12,11 @@ cd $OBASE
 source $BASE/inc/util.sh
 source $BASE/config/config.sh
 
-get_ssh_login staging
+_env=staging
+if [[ $1 != '' ]]; then
+  _env=$1
+fi
+get_ssh_login $_env
 
 echo -e "\nTunneling MySQL connections to $_HOST.\nPress Ctrl+C to stop.\n"
 ssh -L 3306:localhost:3306 $_SSH_USER@$_HOST -N

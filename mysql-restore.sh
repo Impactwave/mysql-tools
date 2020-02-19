@@ -83,6 +83,7 @@ get_db_login $ENV
 if [ $ASK_PASS ]; then
   read -sp "$MYSQL_USER's password: " MYSQL_PWD
   export MYSQL_PWD
+  echo
 fi
 
 echo -e "MySQL host:\t$HOST
