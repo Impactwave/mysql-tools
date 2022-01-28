@@ -75,29 +75,32 @@ If you haven't done it before, add `vendor/bin` to your path, so that you may ex
 ```
 Backs up a MySQL database with sensible default options. Supports SSH connections to remote servers.
 
-Usage: mysql-backup [options] <database> [<archive_name>]
+Usage: mysql-backup [options] [ssh://<ssh-user>@<ssh-host>[:<ssh-port>]]
+       [<mysql-user>:<mysql-pass>@<mysql-host>[:mysql-port]] <database> [<archive_name>]
 
 Parameters:
-  database        Name of database to be backed up.
+  ssh-user        Username for the SSH connnection.
+                  Note: you must use key-based SSH authentication; there is no option to specify a password.
+  ssh-host        Hostname or IP address for the SSH connection.
+  ssh-port        Port for SSH connnection. Defaults to 22.
+  mysql-user      Username for database connection.
+  mysql-pass      Password for database connection.
+  mysql-host      Hostname or IP address for direct network connection to MySQL.
+  database        Name of the database to be backed up.
   archive_name    Filename with optional path and without extension (.tgz or .sql will be appended).
                   If not specified or if it ends with / (it's a directory name), the backup archive will be named
                   'HOST-YYYY-MM-DD-hhmmss.tgz', where HOST is the target server's host name, YYYY-MM-DD is the current
                   date and hhmmss is the current time.
 
 Options:
-  -t "<tables>"   Space-delimited list of tables to be backed up (ex: -t \"table1 table2\").
-  -h <hostname>   Hostname for direct network connection. Defaults to 'localhost'.
-  -u <username>   Username for database connection. Defaults to the current user.
-  -p <password>   Password for database connection.
-  -H <hostname>   Hostname for ssh connection.
-  -P <port>       Port for SSH connnection. Defaults to 22.
-  -U <username>   Username for SSH connnection. Note: you must use key-based ssh authentication; there is no option to
-                  specify a password.
+  -t "<tables>"   Space-delimited list of tables to be backed up (ex: -t "table1 table2").
   -C              Do not compress the backup; the backup file will be an SQL script instead of a compressed archive.
   -D              Do not set DEFINER clauses to the current user (which is done to prevent errors for missing users when
                   the backup is restored).
 
 Notes:
+ - if no ssh:// connection argument is provided, a direct connection to MySQL will be performed.
+ - if no direct connection argument is provided, defaults will be used (localhost, current system user, current user's pass).
  - if an compressed archive is generated, it will contain a file named '$dumpfile'.
  - if using an SSH connection and -n is specified, the backup file will be copied to the local machine using network
    compression.
