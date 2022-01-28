@@ -10,7 +10,7 @@ Add the following to our `composer.json` file:
 
 ```
 "require": {
-    "impactwave/mysql-tools": "dev-master@dev"
+    "impactwave/mysql-tools": "1.0.0"
 },
 ```
 
