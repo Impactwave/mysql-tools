@@ -1,0 +1,161 @@
+#!/bin/bash
+
+backup_options="--compress --create-options --triggers --routines --events --extended-insert --single-transaction --skip-dump-date --skip-comments"
+dumpfile="dump.sql"
+tmp_dir="/tmp"
+
+timer()
+{
+  if [[ $# -eq 0 ]]; then
+    echo $(date '+%s')
+  else
+    local  stime=$1
+    etime=$(date '+%s')
+    if [[ -z "$stime" ]]; then stime=$etime; fi
+    dt=$((etime - stime))
+    ds=$((dt % 60))
+    dm=$(((dt / 60) % 60))
+    dh=$((dt / 3600))
+    printf '%d:%02d:%02d' $dh $dm $ds
+  fi
+}
+start=$(timer)
+
+# Command-line options.
+tables=
+host=localhost
+user=$USER
+pass=
+ssh_host=
+ssh_port=22
+ssh_user=$USER
+compress=Y
+reset_def="| sed -E 's/DEFINER=[^ *]+/DEFINER=CURRENT_USER/g'"
+
+# Note: options must be extracted now, otherwise they'll be lost.
+while getopts "t:h::u:p:H:P:U:CD" opt; do
+  echo $?
+  [[ $OPTARG == -* ]] && echo "Option -$opt requires a value" && exit 1
+  case $opt in
+    t)
+      tables="-t \"$OPTARG\""
+      tables_str="$OPTARG"
+      ;;
+    h)
+      host=$OPTARG;;
+    u)
+      user=$OPTARG;;
+    p)
+      pass="$OPTARG";;
+    H)
+      ssh_host=$OPTARG;;
+    P)
+      ssh_port=$OPTARG;;
+    U)
+      ssh_user=$OPTARG;;
+    C)
+      compress=;;
+    D)
+      reset_def=;;
+    \?) # illegal option
+      exit 1
+  esac
+done
+shift $((OPTIND-1))
+
+if [ $# -lt 1 -o $# -gt 2 ]
+then
+  echo "Backs up a MySQL database with sensible default options. Supports SSH connections to remote servers.
+
+Usage: $(basename $0) [options] <database> [<archive_name>]
+
+Parameters:
+  database        Name of database to be backed up.
+  archive_name    Filename with optional path and without extension (.tgz or .sql will be appended).
+                  If not specified or if it ends with / (it's a directory name), the backup archive will be named
+                  'HOST-YYYY-MM-DD-hhmmss.tgz', where HOST is the target server's host name, YYYY-MM-DD is the current
+                  date and hhmmss is the current time.
+
+Options:
+  -t \"<tables>\"   Space-delimited list of tables to be backed up (ex: -t \"table1 table2\").
+  -h <hostname>   Hostname for direct network connection. Defaults to 'localhost'.
+  -u <username>   Username for database connection. Defaults to the current user.
+  -p <password>   Password for database connection.
+  -H <hostname>   Hostname for ssh connection.
+  -P <port>       Port for SSH connnection. Defaults to 22.
+  -U <username>   Username for SSH connnection. Note: you must use key-based ssh authentication; there is no option to
+                  specify a password.
+  -C              Do not compress the backup; the backup file will be an SQL script instead of a compressed archive.
+  -D              Do not set DEFINER clauses to the current user (which is done to prevent errors for missing users when
+                  the backup is restored).
+
+Notes:
+ - if an compressed archive is generated, it will contain a file named '$dumpfile'.
+ - if using an SSH connection and -n is specified, the backup file will be copied to the local machine using network
+   compression."
+  exit 1
+fi
+
+database=$1
+archive=$2
+out_path=
+extra_scp_args=
+
+if [ "$compress" ];then
+  ext=tgz
+else
+  ext=sql
+  extra_scp_args='-C' #enable compression
+fi
+
+if [[ "$archive" == */ ]];then
+  out_path="$archive"
+  archive=
+fi
+
+if [ -z "$archive" ];then
+  if [ -z "$ssh_host" ];then
+    _host=$host
+  else
+    _host=$ssh_host
+  fi
+  archive="$_host-`date "+%Y-%m-%d-%H%M%S"`.$ext"
+else
+  archive="$archive.$ext"
+fi
+
+target="$out_path$archive"
+
+echo -e "From:\t\t$_host
+Database:\t$database
+Backup archive:\t$target"
+if [ "$ssh_host" ];then
+  echo -e "SSH connection:\t$ssh_user@$ssh_host:$ssh_port"
+fi
+if [ "$tables" ];then
+  echo -e "Tables:\t\t$tables_str"
+fi
+echo
+
+if [ "$compress" ];then
+  cmd2="echo 'Archiving...' && tar -zcf $tmp_dir/$archive -C $tmp_dir $dumpfile && rm $tmp_dir/$dumpfile"
+else
+  cmd2="mv $tmp_dir/$dumpfile $tmp_dir/$archive"
+fi
+cmd="echo 'Backing up...';MYSQL_PWD=\"$pass\" mysqldump -u $user -h $host $backup_options $database $tables $reset_def > $tmp_dir/$dumpfile && $cmd2"
+
+if [ -z "$ssh_host" ];then
+  eval $cmd
+  [ $? -ne 0 ] && exit 1
+  mv $tmp_dir/$archive $target
+else
+  ssh $ssh_user@$ssh_host -p $ssh_port "$cmd"
+  [ $? -ne 0 ] && exit 1
+  echo "Transferring backup to local computer..."
+  scp -P $ssh_port $extra_scp_args $ssh_user@$ssh_host:$tmp_dir/$archive $target
+  [ $? -ne 0 ] && exit 1
+  ssh $ssh_user@$ssh_host -p $ssh_port "rm $tmp_dir/$archive"
+fi
+
+echo "Backup complete"
+printf 'Total elapsed time: %s\n\n' $(timer $start)
